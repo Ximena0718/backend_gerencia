@@ -1,0 +1,8 @@
+.env
+.devcontainer
+.idea
+.idx
+.vscode
+/build
+/node_modules
+structure.json
