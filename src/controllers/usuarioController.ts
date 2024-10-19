@@ -6,8 +6,7 @@ import Result from "../utils/Result";
 
 class usuarioController {
 	public async insertUser(req: Request, res: Response): Promise<void> {
-		const { nombre, apellido, email, username, password, avatar_url, rol } =
-			req.body;
+		const { nombre, apellido, email, username, password, avatar_url, rol } = req.body;
 
 		const validFields = [
 			{ field: nombre, type: "string" },
