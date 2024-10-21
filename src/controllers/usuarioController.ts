@@ -1,69 +1,68 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import UsuarioDAO from "../dao/usuarioDAO";
-import { User, UsuarioCreationResult } from "../interface/interfaces";
+import { User, UsuarioCreationResult, userData } from "../interface/interfaces";
 import Result from "../utils/Result";
 
 class usuarioController {
-	public async insertUser(req: Request, res: Response): Promise<void> {
-		const { nombre, apellido, email, username, password, avatar_url, rol } = req.body;
+	public async insertUser(req: Request, res: Response) {
+		const { nombre, apellido, email, username, password, avatar_url, rol } =
+			req.body;
 
-		const validFields = [
-			{ field: nombre, type: "string" },
-			{ field: apellido, type: "string" },
-			{ field: email, type: "string" },
-			{ field: username, type: "string" },
-			{ field: password, type: "string" },
-			{ field: avatar_url, type: "string" },
-			{ field: rol, type: "string" },
+		const fieldsToValidate = [
+			{ name: "nombre", value: nombre, type: "string" },
+			{ name: "apellido", value: apellido, type: "string" },
+			{ name: "email", value: email, type: "string" },
+			{ name: "username", value: username, type: "string" },
+			{ name: "password", value: password, type: "string" },
+			{ name: "avatar_url", value: avatar_url, type: "string" },
+			{ name: "rol", value: rol, type: "string" },
 		];
 
-		const invalidField = validFields.find(
-			({ field, type }) => typeof field !== type
+		const invalidField = fieldsToValidate.find(
+			({ value, type }) => typeof value !== type
 		);
 
 		if (invalidField) {
-			res.status(400).json({ Respuesta: "Invalid input data types" });
-			return;
+			return res
+				.status(400)
+				.json(`Invalid data type for field '${invalidField.name}'`);
 		}
 
 		try {
 			const saltRounds = 10;
 			const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-			const data = {
+			const data: userData = {
 				nombre,
 				apellido,
 				email,
 				username,
 				password: hashedPassword,
 				avatar_url,
-				rol: rol as
-					| "administrador"
-					| "usuario"
-					| "proveedor"
-					| "establecimiento",
+				rol,
 			};
+
 			const result: Result<UsuarioCreationResult, string> =
 				await UsuarioDAO.createUser(data);
 
 			if (result.isSuccess) {
-				res.status(200).json(result.getValue());
+				return res.status(200).json(result.getValue());
 			} else {
-				res.status(400).json({ Respuesta: result.errorValue() });
+				return res.status(400).json({ error: result.errorValue() });
 			}
 		} catch (error: any) {
-			res
+			return res
 				.status(500)
-				.json({ Respuesta: `Error al crear el usuario: ${error.message}` });
+				.json(`Error al crear el usuario: ${error.message}`);
 		}
 	}
 
 	public async insertMultipleUsers(req: Request, res: Response): Promise<void> {
-		const users = req.body;
+		const users: userData[] = req.body;
 
 		if (!Array.isArray(users)) {
-			res.status(400).json({ Respuesta: "Se esperaba un array de usuarios" });
+			res.status(400).json({ mensaje: "Se esperaba un array de usuarios" });
 			return;
 		}
 
@@ -80,7 +79,7 @@ class usuarioController {
 
 				const saltRounds = 10;
 				const hashedPassword = await bcrypt.hash(password, saltRounds);
-				const userData = {
+				const data: userData = {
 					nombre,
 					apellido,
 					email,
@@ -90,25 +89,29 @@ class usuarioController {
 					rol,
 				};
 
-				return UsuarioDAO.createUser(userData);
+				return UsuarioDAO.createUser(data);
 			});
 
 			const results = await Promise.all(insertions);
 			const failed = results.filter((result) => !result.isSuccess);
+			const successful = results.filter((result) => result.isSuccess);
+			const insertedIds = successful.map((result) => result.getValue().user_id);
 
 			if (failed.length > 0) {
 				res
 					.status(400)
-					.json({ Respuesta: "Error en algunas inserciones", errores: failed });
+					.json({ mensaje: "Error en algunas inserciones", errores: failed });
 			} else {
-				res
-					.status(200)
-					.json({ Respuesta: "Todos los usuarios insertados exitosamente" });
+				res.status(200).json({
+					mensaje: "Todos los usuarios insertados exitosamente",
+					cantidad: successful.length,
+					ids: insertedIds,
+				});
 			}
 		} catch (error: any) {
 			res
 				.status(500)
-				.json({ Respuesta: `Error al crear usuarios: ${error.message}` });
+				.json({ mensaje: `Error al crear usuarios: ${error.message}` });
 		}
 	}
 
@@ -136,12 +139,12 @@ class usuarioController {
 					});
 				}
 			} else {
-				res.status(400).json({ Respuesta: result.errorValue() });
+				res.status(400).json({ mensaje: result.errorValue() });
 			}
 		} catch (error: any) {
 			res
 				.status(500)
-				.json({ Respuesta: `Error al obtener el usuario: ${error.message}` });
+				.json({ mensaje: `Error al obtener el usuario: ${error.message}` });
 		}
 	}
 }

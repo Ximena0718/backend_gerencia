@@ -10,7 +10,7 @@ class tokenController {
 			const result = await tokenDAO.getUserCredentials(username);
 
 			if (!result.isSuccess) {
-				res.status(400).json({ Respuesta: result.errorValue() });
+				res.status(400).json({ mensaje: result.errorValue() });
 				return;
 			}
 
@@ -19,7 +19,7 @@ class tokenController {
 			const isPasswordValid = await bcrypt.compare(password, user.password);
 
 			if (!isPasswordValid) {
-				res.status(401).json({ Respuesta: "Credenciales inválidas" });
+				res.status(401).json({ mensaje: "Credenciales inválidas" });
 				return;
 			}
 
@@ -36,7 +36,7 @@ class tokenController {
 		} catch (error: any) {
 			res
 				.status(500)
-				.json({ Respuesta: `Error al iniciar sesión: ${error.message}` });
+				.json({ mensaje: `Error al iniciar sesión: ${error.message}` });
 		}
 	}
 }

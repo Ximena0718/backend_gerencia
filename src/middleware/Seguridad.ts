@@ -11,14 +11,12 @@ class Seguridad {
 		if (!authHeader) {
 			return res
 				.status(401)
-				.json({ Respuesta: "Falta el token de autorización" });
+				.json({ mensaje: "Falta el token de autorización" });
 		}
 
 		const [bearer, token] = authHeader.split(" ");
 		if (bearer !== "Bearer" || !token) {
-			return res
-				.status(401)
-				.json({ Respuesta: "Formato del token incorrecto" });
+			return res.status(401).json({ mensaje: "Formato del token incorrecto" });
 		}
 
 		try {
@@ -28,13 +26,13 @@ class Seguridad {
 			next();
 		} catch (error) {
 			if (error instanceof jwt.TokenExpiredError) {
-				return res.status(401).json({ Respuesta: "El token ha expirado" });
+				return res.status(401).json({ mensaje: "El token ha expirado" });
 			} else if (error instanceof jwt.JsonWebTokenError) {
-				return res.status(401).json({ Respuesta: "El token no es válido" });
+				return res.status(401).json({ mensaje: "El token no es válido" });
 			} else {
 				return res
 					.status(500)
-					.json({ Respuesta: "Error al procesar el token" });
+					.json({ mensaje: "Error al procesar el token" });
 			}
 		}
 	}
@@ -45,7 +43,7 @@ class Seguridad {
 			if (!user || !rolesPermitidos.includes(user.rol)) {
 				return res
 					.status(403)
-					.json({ Respuesta: "No tienes los permisos necesarios" });
+					.json({ mensaje: "No tienes los permisos necesarios" });
 			}
 			next();
 		};

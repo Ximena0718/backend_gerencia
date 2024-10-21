@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import cache from "../utils/Cache";
 
-// Extendemos el tipo Response para incluir sendResponse
 declare module "express-serve-static-core" {
 	interface Response {
 		sendResponse?: (body?: any) => Response;

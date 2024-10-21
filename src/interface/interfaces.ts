@@ -1,3 +1,5 @@
+import express from "express";
+
 export interface User {
 	user_id: string;
 	nombre: string;
@@ -6,9 +8,26 @@ export interface User {
 	username: string;
 	password: string;
 	avatar_url: string;
-	rol: "administrador" | "usuario" | "proveedor" | "establecimiento";
+	rol: Rol;
 	created_at: Date;
 	updated_at: Date;
+}
+
+export interface userData {
+	nombre: string;
+	apellido: string;
+	email: string;
+	username: string;
+	password: string;
+	avatar_url: string;
+	rol: Rol;
+}
+
+export enum Rol {
+	Administrador = "administrador",
+	Usuario = "usuario",
+	Proveedor = "proveedor",
+	Establecimiento = "establecimiento",
 }
 
 export interface Token {
@@ -23,4 +42,9 @@ export interface DataToken {
 
 export interface UsuarioCreationResult {
 	user_id: string;
+}
+
+export interface morganToken {
+	name: string;
+	formatter: (req: express.Request, res: express.Response) => string;
 }
