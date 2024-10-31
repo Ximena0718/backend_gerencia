@@ -42,3 +42,37 @@ export const SQL_USUARIO = {
 		FROM users 
 		WHERE email = $1 OR username = $2;`,
 };
+export const SQL_ESTABLECIMIENTOS = {
+	createTable: `
+	  CREATE TABLE IF NOT EXISTS lugaresUsta (
+		id_lugar UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+		nombreEvento VARCHAR(100) NOT NULL,
+		direccionEvento VARCHAR(100) NOT NULL,
+		aforoLugarEvento INT NOT NULL
+	  )
+	`,
+	
+	getAllLugares: `
+	  SELECT * FROM lugaresUsta;
+	`,
+  
+	getLugarById: `
+	  SELECT * FROM lugaresUsta WHERE id_lugar = $1;
+	`,
+  
+	insertLugar: `
+	  INSERT INTO lugaresUsta (nombreEvento, direccionEvento, aforoLugarEvento)
+	  VALUES ($1, $2, $3) RETURNING id_lugar;
+	`,
+  
+	updateLugar: `
+	  UPDATE lugaresUsta
+	  SET nombreEvento = $1, direccionEvento = $2, aforoLugarEvento = $3
+	  WHERE id_lugar = $4;
+	`,
+  
+	deleteLugar: `
+	  DELETE FROM lugaresUsta WHERE id_lugar = $1;
+	`
+  };
+  
